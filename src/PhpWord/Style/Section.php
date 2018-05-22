@@ -24,6 +24,7 @@ class Section extends Border
 {
     /**
      * Page orientation
+     * 纸张方向。portrait竖向/landscape横向
      *
      * @const string
      */
@@ -244,6 +245,7 @@ class Section extends Border
 
     /**
      * Get Page Orientation
+     * 获取当前的纸张方向
      *
      * @return string
      */
@@ -254,6 +256,7 @@ class Section extends Border
 
     /**
      * Set Portrait Orientation
+     * 设置纸张方向为竖向
      *
      * @return self
      */
@@ -264,6 +267,7 @@ class Section extends Border
 
     /**
      * Set Landscape Orientation
+     * 设置纸张方向为横向
      *
      * @return self
      */
