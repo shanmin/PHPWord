@@ -26,7 +26,6 @@ class Section extends Border
 {
     /**
      * Page orientation
-     * 纸张方向。portrait竖向/landscape横向
      *
      * @const string
      */
