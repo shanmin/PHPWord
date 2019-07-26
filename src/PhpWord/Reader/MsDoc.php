@@ -1196,27 +1196,24 @@ class MsDoc extends AbstractReader implements ReaderInterface
                 $posMem += 24;
                 // xszFfn
                 $xszFfn = '';
+                $char='';
                 do {
-                    $char = self::getInt2d($this->data1Table, $posMem);
+                    $xszFfn .= $char;
+                    $char = substr($this->data1Table, $posMem, 2);
                     $posMem += 2;
-                    if ($char > 0) {
-                        $xszFfn .= chr($char);
-                    }
-                } while ($char != 0);
+                } while ($char != "\0\0");
                 // xszAlt
                 $xszAlt = '';
+                $char='';
                 if ($ixchSzAlt > 0) {
                     do {
-                        $char = self::getInt2d($this->data1Table, $posMem);
+                        $xszAlt .= $char;
+                        $char = substr($this->data1Table, $posMem, 2);
                         $posMem += 2;
-                        if ($char == 0) {
-                            break;
-                        }
-                        $xszAlt .= chr($char);
-                    } while ($char != 0);
+                    } while ($char != "\0\0");
                 }
                 $this->arrayFonts[] = array(
-                    'main' => $xszFfn,
+                    'main' => iconv('UCS-2', 'UTF-8', $xszFfn),
                     'alt'  => $xszAlt,
                 );
             }
@@ -1256,18 +1253,7 @@ class MsDoc extends AbstractReader implements ReaderInterface
                 $offset += 12;
             }
 
-            foreach (array_keys($arrayRGFC) as $key) {
-                if (!isset($arrayRGFC[$key + 1])) {
-                    break;
-                }
-                $strLen = $arrayRGFC[$key + 1] - $arrayRGFC[$key] - 1;
-                for ($inc = 0; $inc < $strLen; $inc++) {
-                    $byte = self::getInt1d($this->dataWorkDocument, $arrayRGFC[$key] + $inc);
-                    if ($byte > 0) {
-                        $string .= chr($byte);
-                    }
-                }
-            }
+            $string=substr($this->dataWorkDocument,$arrayRGFC[0],$arrayRGFC[count($arrayRGFC)-1]-$arrayRGFC[0]);
             $this->arrayParagraphs[] = $string;
 
             //@todo readPrl for paragraphs
@@ -1473,7 +1459,7 @@ class MsDoc extends AbstractReader implements ReaderInterface
         foreach ($arrayRGB as $keyRGB => $rgb) {
             $oStyle = new \stdClass();
             $oStyle->pos_start = $start;
-            $oStyle->pos_len = (int) ceil((($arrayRGFC[$keyRGB] - 1) - $arrayRGFC[$keyRGB - 1]) / 2);
+            $oStyle->pos_len = $arrayRGFC[$keyRGB] - $arrayRGFC[$keyRGB - 1];
             $start += $oStyle->pos_len;
 
             if ($rgb > 0) {
@@ -2233,6 +2219,7 @@ class MsDoc extends AbstractReader implements ReaderInterface
                 $textPara = $itmParagraph;
                 foreach ($this->arrayCharacters as $oCharacters) {
                     $subText = substr($textPara, $oCharacters->pos_start, $oCharacters->pos_len);
+                    $subText = iconv('UCS-2', 'UTF-8', $subText);
                     $subText = str_replace(chr(13), PHP_EOL, $subText);
                     $arrayText = explode(PHP_EOL, $subText);
                     if (end($arrayText) == '') {
